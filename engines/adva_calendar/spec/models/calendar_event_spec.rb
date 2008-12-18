@@ -145,7 +145,11 @@ describe CalendarEvent do
     end
   end
   describe "recurring events" do
-    it "should have a parent event"
+    it "should have a parent event" do
+      @event.should have_many(:recurring_events)
+      child_event = @calendar.events.create!(@event.attributes.reject{|k,v| k==:recurrence})
+      child_event.should belong_to(:parent_event)
+    end
     it "should support daily events"
     it "should support weekly events"
     it "should support monthly events"

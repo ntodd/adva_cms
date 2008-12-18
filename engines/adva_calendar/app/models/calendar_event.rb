@@ -8,6 +8,11 @@ class CalendarEvent < ActiveRecord::Base
   belongs_to :section
   alias :calendar :section
   belongs_to :user
+  
+  serialize :recurrence
+  
+  belongs_to :parent_event, :class_name => "CalendarEvent", :foreign_key => "parent_id"
+  has_many :recurring_events, :class_name => "CalendarEvent", :foreign_key => "parent_id"
 
   has_permalink :title, :scope => :section_id
   acts_as_taggable
@@ -20,9 +25,11 @@ class CalendarEvent < ActiveRecord::Base
   validates_presence_of :title
   validates_presence_of :user_id
   validates_presence_of :section_id
+  validates_presence_of :location_id
   validates_uniqueness_of :permalink, :scope => :section_id
   
   before_create :set_published
+  before_save :update_recurring_events
 
   named_scope :by_categories, Proc.new {|*category_ids| {:conditions => ['category_assignments.category_id IN (?)', category_ids], :include => :category_assignments}}
   named_scope :elapsed, lambda {{:conditions => ['startdate < ? AND (enddate IS ? OR enddate < ?)', Time.now, nil, Time.now], :order => 'startdate DESC'}}
@@ -36,10 +43,23 @@ class CalendarEvent < ActiveRecord::Base
     %w(title body).include?(filter.to_s) ? filter.to_s : 'title'
   end
   def set_published
-    self.published_at = Time.zone.now
+    self.published_at ||= Time.zone.now
   end
 
   def validate
     errors.add(:enddate, 'must be after start date') if ! self.enddate.nil? and self.enddate < self.startdate 
   end
+
+  def update_recurring_events
+    # We assume that recurring event are unique on a index of
+    #   [parent_id, startdate, enddate]
+    # In order to keep bookmarks or any other reference we must update
+    # or create the recurring events and not just delete all and create
+    return unless changed? and self.recurrence_changed?
+  end
+
+  def recurrence
+#    attributes[:recurrence] || 
+  end
+
 end
