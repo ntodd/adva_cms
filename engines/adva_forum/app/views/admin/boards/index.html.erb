@@ -5,7 +5,7 @@
     <%= link_to t(:'adva.boards.links.new'), new_admin_board_path %>
     <% if @boards.size > 1 %>
       &middot;
-      <%= link_to_function t(:'adva.boards.links.reorder'), "boards_tree.toggle(this, t(:'adva.resources.reordering_done'));", :id => 'reorder_boards' %>
+      <%= link_to_function t(:'adva.boards.links.reorder'), "boards_tree.toggle(this, '#{t(:'adva.resources.reordering_done')}');", :id => 'reorder_boards' %>
       <%= image_tag '/images/adva_cms/indicator.gif', :id => 'boards_indicator', :style => 'display: none;' %>
     <% end %>
   </p>
