@@ -195,7 +195,7 @@ describe Admin::ArticlesController do
     end
       
     describe "given a version param" do 
-      act! { request_to :put, @member_path, @params.merge({:article => {:version => "1"}}) }
+      act! { request_to :put, @member_path, @params.merge({:article => {:version => "2"}}) }
       
       describe "and the article can be rolled back to the given version" do
         before :each do
