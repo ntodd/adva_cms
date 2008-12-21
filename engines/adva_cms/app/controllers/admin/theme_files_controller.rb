@@ -39,9 +39,10 @@ class Admin::ThemeFilesController < Admin::BaseController
   end
 
   def destroy
+    # FIXME have to do this just to get the compiled method name before the file is destroyed
+    expire_template!(@file) 
     if @file.destroy
       expire_pages_by_site! # TODO use active_model?
-      expire_template! @file
       flash[:notice] = t(:'adva.theme_files.flash.destroy.success')
       redirect_to admin_theme_path(@site, @theme.id)
     else
