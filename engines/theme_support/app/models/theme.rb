@@ -73,8 +73,9 @@ class Theme
 
   def initialize(attrs = {})
     @errors = []
-    attrs['id'] = self.class.to_id(attrs['name']) if attrs['name'] && !attrs['id']
-    attrs['path'] += attrs['id'] if attrs['id']
+    attrs.symbolize_keys!
+    attrs[:id] = self.class.to_id(attrs[:name]) if attrs[:name] && !attrs[:id]
+    attrs[:path] += attrs[:id] if attrs[:id]
     self.attributes = attrs
   end
 
@@ -226,6 +227,10 @@ class Theme
   def destroy
     raise ThemeError.new("can't remove directory #{@path}") unless @path.to_s =~ %r(^#{Theme.base_dir})
     FileUtils.remove_dir @path.to_s
+  end
+  
+  def ==(other)
+    other and self.path == other.path
   end
 
 protected
