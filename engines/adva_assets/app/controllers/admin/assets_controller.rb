@@ -1,8 +1,4 @@
 class Admin::AssetsController < Admin::BaseController
-  # member_actions.push(*%w(index new create latest search add_bucket clear_bucket edit update))
-  # skip_before_filter :login_required
-  # before_filter :login_required
- 
   include AssetsHelper
   helper :assets
   helper_method :created_notice
@@ -10,6 +6,8 @@ class Admin::AssetsController < Admin::BaseController
   before_filter :set_search_params, :set_assets, :only => [:index]
   before_filter :set_format, :only => [:create]
   before_filter :set_asset, :only => [:edit, :update, :destroy]
+  
+  # FIXME ... should guard permissions!
 
   def index
     @recent = @assets.slice! 0, 4 if params[:source] != 'widget'

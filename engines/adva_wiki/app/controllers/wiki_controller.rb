@@ -12,7 +12,7 @@ class WikiController < BaseController
 
   caches_page_with_references :index, :show, :track => ['@wikipage', '@wikipages', '@category', {'@site' => :tag_counts, '@section' => :tag_counts}]
   cache_sweeper :wikipage_sweeper, :category_sweeper, :tag_sweeper, :only => [:create, :update, :rollback, :destroy]
-  guards_permissions :wikipage, :except => [:index, :show, :diff], :edit => :rollback
+  guards_permissions :wikipage, :except => [:index, :show, :diff, :comments], :edit => :rollback
 
   def index
     respond_to do |format|
@@ -44,7 +44,8 @@ class WikiController < BaseController
   end
 
   def create
-    if @wikipage = @section.wikipages.create(params[:wikipage])
+    @wikipage = @section.wikipages.build(params[:wikipage])
+    if @wikipage.save
       trigger_events @wikipage
       flash[:notice] = t(:'adva.wiki.flash.create.success')
       redirect_to wikipage_path(:section_id => @section, :id => @wikipage.permalink)
@@ -58,12 +59,12 @@ class WikiController < BaseController
   end
 
   def update
-    params[:version] ? rollback : update_attributes
+    params[:wikipage][:version] ? rollback : update_attributes
   end
 
   def update_attributes
     if @wikipage.update_attributes(params[:wikipage])
-      trigger_events @wikipage
+      trigger_event @wikipage, :updated
       flash[:notice] = t(:'adva.wiki.flash.update_attributes.success')
       redirect_to wikipage_path(:section_id => @section, :id => @wikipage.permalink)
     else
@@ -73,13 +74,14 @@ class WikiController < BaseController
   end
 
   def rollback
-    if @wikipage.revert_to(params[:version]) && @wikipage.save
+    version = params[:wikipage][:version].to_i
+    if @wikipage.version != version and @wikipage.revert_to!(version)
       trigger_event @wikipage, :rolledback
       flash[:notice] = t(:'adva.wiki.flash.rollback.success', :version => params[:version])
       redirect_to wikipage_path(:section_id => @section, :id => @wikipage.permalink)
     else
       flash.now[:error] = t(:'adva.wiki.flash.rollback.failure', :version => params[:version])
-      render :action => :edit
+      redirect_to wikipage_path(:section_id => @section, :id => @wikipage.permalink)
     end
   end
 
@@ -145,6 +147,7 @@ class WikiController < BaseController
       return unless params[:wikipage]
       updated_at = params[:wikipage].delete(:updated_at)
       unless updated_at
+        # TODO raise something more explicit here
         raise t(:'adva.wiki.exception.missing_timestamp')
       end
       if @wikipage.updated_at && (Time.zone.parse(updated_at) != @wikipage.updated_at)
