@@ -6,11 +6,8 @@ class ArticleSweeper < CacheReferences::Sweeper
   # end
 
   def before_save(article)
-    if article.new_record?
-      expire_cached_pages_by_section(article.section)
-    else
-      expire_cached_pages_by_reference(article)
-    end
+    record = article.new_record? ? article.section : article
+    expire_cached_pages_by_reference(record)
   end
   
   # def after_save(article)

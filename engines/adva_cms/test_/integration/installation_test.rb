@@ -3,13 +3,12 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test_helper' )
 class InstallationTest < ActionController::IntegrationTest
   include CacheableFlash::TestHelpers
 
-  def test_a_user_goes_through_site_install_process
-    install_initial_site!
-    manage_new_site!
-    log_out_and_view_empty_frontend!
+  setup do
+    Site.delete_all
+    User.delete_all
   end
   
-  def install_initial_site!
+  test "user installs the initial site, manages the new site, logs out and views the empty frontend" do
     # go to root page
     get "/"
 
@@ -17,7 +16,7 @@ class InstallationTest < ActionController::IntegrationTest
     assert_template "admin/install/index"
 
     # fill in the form and submit the form
-    fill_in :site_name,     :with => "adva-cms Test"
+    fill_in :site_name,     :with => "adva-cms test"
     fill_in :user_email,    :with => "test@example.org"
     fill_in :user_password, :with => "test_password"
     fill_in :section_title, :with => "Home"
@@ -57,15 +56,14 @@ class InstallationTest < ActionController::IntegrationTest
 
     # check that the user sees the site dashboard
     assert_template "admin/sites/show"
-  end
-  
-  def log_out_and_view_empty_frontend!
+    
+    # logout
     click_link "Logout"
 
     # check that the user sees the frontend
     assert_template "sections/show"
     
     #check that the frontend contains the site title
-    assert response.body =~ /adva-cms Test/, "frontend should contain site title"
+    assert response.body =~ /adva-cms test/i, "frontend should contain site title"
   end
 end

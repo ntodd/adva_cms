@@ -195,7 +195,7 @@ describe Admin::ArticlesController do
     end
 
     describe "given a version param" do
-      act! { request_to :put, @member_path, @params.merge({:article => {:version => "1"}}) }
+      act! { request_to :put, @member_path, @params.merge({:article => {:version => "2"}}) }
 
       describe "and the article can be rolled back to the given version" do
         before :each do
@@ -296,7 +296,7 @@ describe "ArticleSweeper" do
 
  it "should expire pages that reference the article's section when the article is a new record" do
    @article.stub!(:new_record?).and_return(true)
-   @sweeper.should_receive(:expire_cached_pages_by_section).with(@article.section)
+   @sweeper.should_receive(:expire_cached_pages_by_reference).with(@article.section)
    @sweeper.before_save(@article)
  end
 

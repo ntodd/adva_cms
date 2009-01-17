@@ -57,7 +57,7 @@ describe "Blog views:" do
 
     describe "with an article that accepts comments" do
       it "should render the comments/form partial" do
-        @article.should_receive(:accept_comments?).and_return true
+        @article.should_receive(:accept_comments?).exactly(2).times.and_return true
         template.should_receive(:render).with hash_including(:partial => 'comments/form')
         render "blog/show"
       end
@@ -65,7 +65,7 @@ describe "Blog views:" do
 
     describe "with an article that does not accept comments" do
       it "should not render the comments/form partial" do
-        @article.should_receive(:accept_comments?).and_return false
+        @article.should_receive(:accept_comments?).exactly(2).times.and_return false
         template.should_not_receive(:render).with hash_including(:partial => 'comments/form')
         render "blog/show"
       end

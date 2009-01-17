@@ -8,7 +8,7 @@ class Admin::SitesController < Admin::BaseController
   cache_sweeper :site_sweeper, :only => [:create, :update, :destroy]
 
   authentication_required
-  guards_permissions :site, :except => [:show, :index]
+  guards_permissions :site # FIXME :except => [:show, :index] - why would we exclude these?
 
   helper :activities
 

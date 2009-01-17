@@ -8,8 +8,9 @@ describe WikiController, 'Permissions' do
     @site = stub_model Site, :host => 'test.host'
     @wiki = stub_model Wiki, :id => 1, :site => @site, :path => 'wiki'
     @wikipage = stub_model Wikipage, :section => @wiki
+    @wikipage.stub!(:save).and_return true
     
-    @wiki.wikipages.stub!(:create).and_return @wikipage
+    @wiki.wikipages.stub!(:build).and_return @wikipage
     @wiki.wikipages.stub!(:find).and_return @wikipage
     @wiki.wikipages.stub!(:find_or_initialize_by_permalink).and_return @wikipage
 
@@ -91,7 +92,7 @@ describe WikiController, 'Permissions' do
           should_grant_access(method, path)
         end
 
-        it "denies access to a non-user" do
+        it "grants access to a non-user" do
           should_grant_access(method, path)
         end
       end

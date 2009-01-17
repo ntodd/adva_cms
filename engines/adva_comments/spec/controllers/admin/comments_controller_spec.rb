@@ -57,7 +57,7 @@ describe Admin::CommentsController do
     it "should fetch unapproved comments when :filter == state and :state == unapproved" do
       query_params = { :filter => 'state', :state => 'unapproved' }
   
-      options = hash_including(:conditions => "unapproved = '0'")
+      options = hash_including(:conditions => "approved = '0'")
       @section.comments.should_receive(:paginate).with(options).and_return(@comments)
       request_to :get, @collection_path, @parameters.merge(query_params)
     end
@@ -86,8 +86,8 @@ describe Admin::CommentsController do
       request_to :get, @collection_path, @parameters.merge(query_params)
     end
 
-    it "should fetch comments by checking author website when :filter == author_website" do
-      query_params = { :filter => 'author_website', :query => 'homepage' }
+    it "should fetch comments by checking author website when :filter == author_homepage" do
+      query_params = { :filter => 'author_homepage', :query => 'homepage' }
   
       options = hash_including(:conditions => "LOWER(author_homepage) LIKE '%homepage%'")
       @section.comments.should_receive(:paginate).with(options).and_return(@comments)
