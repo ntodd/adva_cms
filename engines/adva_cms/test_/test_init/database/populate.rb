@@ -51,10 +51,10 @@ blog_category =
 Category.create! :section => blog,
                  :title => 'a category'
 
-forum_without_board =
+forum_without_boards =
 Forum.create!    :site        => site_with_forums,
-                 :title       => 'a forum without board',
-                 :permalink   => 'a-forum-without-board',
+                 :title       => 'a forum without boards',
+                 :permalink   => 'a-forum-without-boards',
                  :comment_age => 0
                  
 forum_with_boards =
@@ -72,7 +72,12 @@ another_board =
 Board.create!    :site    => site_with_forums,
                  :section => forum_with_boards,
                  :title   => 'another board'
-                 
+
+topicless_board =
+Board.create!    :site    => site_with_forums,
+                 :section => forum_with_boards,
+                 :title   => 'a topicless board'
+
 site_with_wiki =
 Site.create!     :name => 'site with wiki',
                  :title => 'site with wiki title',
@@ -114,7 +119,26 @@ User.create!     :first_name => 'a moderator',
 moderator.grant :moderator, section
 moderator.grant :moderator, blog
 
+board_topic_attrs = {  :site      => site_with_forums,
+                       :section   => forum_with_boards,
+                       :board     => forum_board,
+                       :title     => 'a board topic',
+                       :body      => 'a board topic body',
+                       :permalink => 'a-board-topic' }
 
+board_topic =
+Topic.post       user, board_topic_attrs
+board_topic.save!
+
+topic_attrs = {  :site      => site_with_forums,
+                 :section   => forum_without_boards,
+                 :title     => 'a topic',
+                 :body      => 'a topic body',
+                 :permalink => 'a-topic' }
+
+topic =
+Topic.post       user, topic_attrs
+topic.save!    
 
 section_article =
 Article.create!  :site => site_with_sections,

@@ -9,11 +9,35 @@ class Test::Unit::TestCase
     end
   end
   
-  share :a_forum_without_board do
+  share :a_board_topic do
     before do
-      @section  = Forum.find_by_permalink 'a-forum-without-board'
+      @board_topic = @board.topics.find_by_permalink('a-board-topic')
+    end
+  end
+  
+  share :a_topicless_board do
+    before do
+      @topicless_board = @section.boards.find_by_title 'a topicless board'
+    end
+  end
+  
+  share :a_forum_without_boards do
+    before do
+      @section  = Forum.find_by_permalink 'a-forum-without-boards'
       @site     = @section.site
       set_request_host!
+    end
+  end
+  
+  share :a_topic do
+    before do
+      @topic = @section.topics.find_by_permalink 'a-topic'
+    end
+  end
+  
+  share :without_topics do
+    before do
+      @section.topics.delete_all
     end
   end
 end
