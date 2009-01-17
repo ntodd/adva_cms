@@ -7,7 +7,7 @@ class PostsController < BaseController
   cache_sweeper :comment_sweeper, :only => [:create, :update, :destroy]
 
   def new
-    @post = Post.new
+    @post = Post.new(:author => current_user)
   end
 
   def create
