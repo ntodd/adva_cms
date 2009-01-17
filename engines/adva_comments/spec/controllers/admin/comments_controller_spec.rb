@@ -57,7 +57,7 @@ describe Admin::CommentsController do
     it "should fetch unapproved comments when :filter == state and :state == unapproved" do
       query_params = { :filter => 'state', :state => 'unapproved' }
   
-      options = hash_including(:conditions => "unapproved = '0'")
+      options = hash_including(:conditions => "approved = '0'")
       @section.comments.should_receive(:paginate).with(options).and_return(@comments)
       request_to :get, @collection_path, @parameters.merge(query_params)
     end

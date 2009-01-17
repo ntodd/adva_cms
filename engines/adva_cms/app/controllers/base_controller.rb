@@ -22,9 +22,6 @@ class BaseController < ApplicationController
   #                          :force_template_types => ['html.serb', 'liquid']
   #                          :force_template_types => lambda {|c| ['html.serb', 'liquid'] unless c.class.name =~ /^Admin::/ }
 
-  # TODO move these to acts_as_commentable (?)
-  caches_page_with_references :comments, :track => ['@commentable']
-
   filter_parameter_logging :password
 
   def comments
@@ -35,11 +32,8 @@ class BaseController < ApplicationController
   end
 
   protected
-    def set_section; super(Album); end # mseppae: HU?
-    
     def set_site
-      @site = Site.find_by_host(request.host_with_port)
-      Thread.current[:site] = @site
+      @site = Site.find_by_host(request.host_with_port) # or raise "can not set site from host #{request.host_with_port}"
     end
 
     def set_section(type = nil)

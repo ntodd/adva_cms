@@ -81,7 +81,8 @@ describe Admin::WikipagesController do
 
     describe "given invalid wikipage params" do
       before :each do 
-        @wiki.wikipages.should_receive(:create).and_return false 
+        @wiki.wikipages.should_receive(:create).and_return @wikipage
+        @wikipage.stub!(:valid?).and_return false
       end
       it_renders_template :new
       it_assigns_flash_cookie :error => :not_nil
@@ -94,7 +95,7 @@ describe Admin::WikipagesController do
       @wikipage.stub!(:state_changes).and_return([:updated])
     end
     
-    act! { request_to :put, @member_path }
+    act! { request_to :put, @member_path, :wikipage => {} }
     it_assigns :wikipage
     it_guards_permissions :update, :wikipage
   
@@ -126,7 +127,7 @@ describe Admin::WikipagesController do
       @wikipage.stub!(:state_changes).and_return([:rolledback])
     end
 
-    act! { request_to :put, @member_path, {:version => 1} }
+    act! { request_to :put, @member_path, :wikipage => {:version => 1} }
     it_guards_permissions :update, :wikipage
     it_assigns :wikipage
 
@@ -146,7 +147,7 @@ describe Admin::WikipagesController do
         @wikipage.stub!(:revert_to!).and_return false
       end
       
-      it_renders_template :edit
+      it_redirects_to { @edit_member_path }
       it_assigns_flash_cookie :error => :not_nil
       it_does_not_trigger_any_event
     end

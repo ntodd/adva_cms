@@ -1,8 +1,19 @@
-<h2><%= t(:'adva.titles.boards') %></h2>
+<h2><%= @section.title %></h2>
 
-<% unless @boards.empty? %>
-  <p class="hint">
-    <%= link_to t(:'adva.boards.links.new'), new_admin_board_path %>
+<%= render :partial => 'side_panel' %>
+
+<div class='statistics'>
+	<p class='total'>
+		<%= "This forum has total of #{@section.boards.size} boards, #{@section.topics.size} topics and #{@section.comments.size} posts." %><br />
+		<%= "Click " + link_to('here', forum_path(@section))%> to go to your forum.
+	</p>
+</div>
+
+<%= render :partial => 'topics' %>
+
+<h2><%= t(:'adva.titles.boards') %></h2>
+<% unless @boards.empty? -%>  
+	<p class="hint">
     <% if @boards.size > 1 %>
       &middot;
       <%= link_to_function t(:'adva.boards.links.reorder'), "boards_tree.toggle(this, '#{t(:'adva.resources.reordering_done')}');", :id => 'reorder_boards' %>
@@ -14,6 +25,10 @@
     <thead>
       <tr>
         <th scope="col"><%= t(:'adva.titles.board') %></th>
+        <th scope="col"><%= 'Description' %></th>
+        <th scope="col"><%= 'Topics' %></th>
+        <th scope="col"><%= 'Comments' %></th>
+        <th scope="col">&nbsp;</th>
       </tr>
     </thead>
     <tbody id="articles-body">
@@ -32,11 +47,12 @@
     //   }
     // });
   </script>
-  
-<% else %>
-  <div class="empty">
-    
-    <%= t(:'adva.boards.info.no_boards_in_forum', :forum => @section.title) %> 
-    <%= link_to t(:'adva.boards.links.create_now') + ' &raquo;', new_admin_board_path %>
-  </div>
-<% end %>
+<% else -%>
+<div class="empty">
+	<p>
+		All the existing forum topics are moved to your first board when you want to create one.<br />
+		If you need one, follow this link <%= link_to 'here', new_admin_board_path(@site, @section) -%>, or 'Create a new board'
+		link on right-hand menu.
+	</p>
+</div>
+<% end -%>

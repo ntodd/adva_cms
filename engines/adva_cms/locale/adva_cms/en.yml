@@ -134,6 +134,7 @@ en:
         section_default: Home
       no_sites: You currently do not have any sites created.
       no_users: Site does not have any users.
+      no_available_users: Site does not have any available user.
       links:
         delete: Delete this site
         create_site_and_account: "Create site & account \xC2\xBB"
@@ -378,6 +379,7 @@ en:
       view:
         new: "{{name}} <{{email}}> just posted a new {{activity}} on {{site}} in section {{section}}."
       comment: Comment {{actions}}
+      topic: Topic {{actions}}  
       actions: "{{type}} {{actions}} in {{activity}}."
     signup:
       notifications:
@@ -669,7 +671,8 @@ en:
           success: The board has been updated.
           failure: The board could not be updated.
         no_previous_board: There is no previous board. Showing the first one.
-      confirm_delete: Are you sure you wish to delete this board?
+      confirm_delete: All the topics of this board are also deleted with the board. Are you sure you wish to delete this board?
+      confirm_delete_on_last: Are you sure you wish to delete this board? Your topics will not be removed.
     topics:
       info:
         no_topics_in_forum: There are no topics in this forum.
@@ -749,9 +752,13 @@ en:
         topics: Topics
     subscription:
       no_subscriptions: There are no subscribers.
+      confirm_delete: Are you sure you want unsubscribe?
+      flash:
+        destroy_success: Successfully unsubsribed.
       link:
         index: Subscribers
         new: Add a new subscriber
+        destroy: Unsubscribe
       label:
         user: Users
         subscriber: Subscriber

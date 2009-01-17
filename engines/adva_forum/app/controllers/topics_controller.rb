@@ -5,6 +5,7 @@ class TopicsController < BaseController
   before_filter :set_topic, :only => [:show, :edit, :update, :destroy, :previous, :next]
   before_filter :set_posts, :only => :show
   before_filter :set_board, :only => [:new, :update]
+  cache_sweeper :topic_sweeper, :only => [:create, :update, :destroy]
   caches_page_with_references :show, :track => ['@topic', '@posts']
 
   guards_permissions :topic, :except => [:show, :index], :show => [:previous, :next]
@@ -14,7 +15,7 @@ class TopicsController < BaseController
   end
 
   def show
-    @post = Post.new
+    @post = Post.new(:author => current_user)
   end
 
   def new
@@ -53,7 +54,7 @@ class TopicsController < BaseController
     if @topic.destroy
       trigger_events @topic
       flash[:notice] = t(:'adva.topics.flash.destroy.success')
-      redirect_to forum_path(@section)
+      redirect_to params[:return_to] || forum_path(@section)
     else
       flash[:error] = t(:'adva.topics.flash.destroy.failure')
       set_posts
@@ -78,8 +79,15 @@ class TopicsController < BaseController
     def set_section; super(Forum); end
 
     def set_board
-      @board = @section.boards.find params[:board_id] if params[:board_id]
-      raise "Could not set board while posting to #{@section.path.inspect}" if @section.boards.any? && @board.blank?
+      # Board_id depends on if this this GET to a new action or PUT to update
+      # NOTE: GET from backend comes without board_id
+      board_id = params[:board_id]          if request.get?
+      board_id = params[:topic][:board_id]  if request.put?
+      # We only need to fetch board if there actually is board_id supplied.
+      if @section.boards.any? && board_id
+        @board = @section.boards.find board_id
+        raise "Could not set board while posting to #{@section.path.inspect}" if @board.blank?
+      end
     end
 
     def set_topic

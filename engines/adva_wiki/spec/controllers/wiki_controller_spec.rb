@@ -174,7 +174,7 @@ describe WikiController do
     it_assigns :wikipage
   
     it "instantiates a new wikipage from section.wikipages" do
-      @wiki.wikipages.should_receive(:create).and_return @wikipage
+      @wiki.wikipages.should_receive(:build).and_return @wikipage
       act!
     end
   
@@ -186,7 +186,8 @@ describe WikiController do
   
     describe "given invalid wikipage params" do
       before :each do
-        @wiki.wikipages.should_receive(:create).and_return false
+        @wiki.wikipages.should_receive(:build).and_return @wikipage
+        @wikipage.stub!(:save).and_return false
       end
       it_renders_template :new
       it_assigns_flash_cookie :error => :not_nil
@@ -228,16 +229,16 @@ describe WikiController do
   describe "PUT to :update", "with a :version param" do
     before :each do
       controller.stub!(:optimistic_lock)
-      @wikipage.stub!(:revert_to).and_return true
+      @wikipage.stub!(:revert_to!).and_return true
       @wikipage.stub!(:save).and_return true
     end
 
-    act! { request_to :put, wikipage_path, { :version => 1 } }
+    act! { request_to :put, wikipage_path, :wikipage => { :version => 1 } }
     it_guards_permissions :update, :wikipage
     it_assigns :wikipage
 
     it "tries to roll the wikipage back to the given version" do
-      @wikipage.should_receive(:revert_to).and_return true
+      @wikipage.should_receive(:revert_to!).and_return true
       act!
     end
 
@@ -249,7 +250,7 @@ describe WikiController do
     
     describe "given the wikipage can not be rolled back the given version" do
       before :each do
-        @wikipage.stub!(:revert_to).and_return false
+        @wikipage.stub!(:revert_to!).and_return false
         @wikipage.stub!(:save).and_return false
       end
     
@@ -328,7 +329,7 @@ describe WikiController, 'page_caching' do
   end
 
   it "configures the WikipageSweeper to observe Comment create, update, rollback and destroy events" do
-    @wikipage_sweeper.options[:only].to_a.sort.should == ['create', 'destroy', 'rollback', 'update']
+    @wikipage_sweeper.options[:only].to_a.sort.should include('create', 'destroy', 'rollback', 'update')
   end
 
   it "activates the CategorySweeper as an around filter" do
@@ -348,7 +349,7 @@ describe WikiController, 'page_caching' do
   end
 
   it "tracks read access for a bunch of models for the :index action page caching" do
-    WikiController.track_options[:index].should == ['@wikipage', '@wikipages', '@category', {"@section" => :tag_counts, "@site" => :tag_counts}]
+    WikiController.track_options[:index].should include('@wikipage', '@wikipages', '@category', {"@section" => :tag_counts, "@site" => :tag_counts})
   end
 
   it "page_caches the :show action" do
@@ -356,7 +357,7 @@ describe WikiController, 'page_caching' do
   end
 
   it "tracks read access for a bunch of models for the :show action page caching" do
-    WikiController.track_options[:show].should == ['@wikipage', '@wikipages', '@category', {"@section" => :tag_counts, "@site" => :tag_counts}]
+    WikiController.track_options[:show].should include('@wikipage', '@wikipages', '@category', {"@section" => :tag_counts, "@site" => :tag_counts})
   end
 
   it "page_caches the comments action" do

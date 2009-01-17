@@ -18,7 +18,7 @@ describe TopicsController do
 
     @controller.stub!(:forum_path).and_return forum_path # TODO have a helper for this kind of stuff
     @controller.stub!(:topic_path).and_return topic_path    
-
+    @controller.stub!(:current_user).and_return @user
     @controller.stub!(:has_permission?).and_return true # TODO
   end
 
@@ -48,6 +48,11 @@ describe TopicsController do
     it_assigns :topic
     it_renders_template :show
     # it_guards_permissions :show, :topic # deactivated all :show permissions in the backend
+    
+    it "instantiates a new post object" do
+      Post.should_receive(:new).with(:author => @user)
+      act!
+    end
   end  
   
   describe "POST to :create" do
@@ -120,6 +125,7 @@ describe TopicsController do
   describe "DELETE to :destroy" do
     before :each do
       @topic.stub!(:state_changes).and_return([:deleted])
+      request.env["HTTP_REFERER"] = forum_path
     end
     
     act! { request_to :delete, topic_path }    
@@ -162,5 +168,44 @@ describe TopicsController do
       act!
       controller.params[:topic].keys.should include('locked', 'sticky')
     end
+  end
+end
+
+describe "TopicsSweeper" do
+  include SpecControllerHelper
+  include FactoryScenario
+    controller_name 'topics'
+
+  before :each do
+    Site.delete_all
+    factory_scenario :forum_with_topics
+    @sweeper = TopicSweeper.instance
+  end
+  
+  it "observes Section, Board, Topic" do
+    ActiveRecord::Base.observers.should include(:topic_sweeper)
+  end
+
+  it "should expire topics that reference a topic's section" do
+    @sweeper.should_receive(:expire_cached_pages_by_section).with(@topic.section)
+    @sweeper.after_save(@topic)
+  end
+  
+  it "should expire pages that topic board" do
+    @topic.stub!(:owner).and_return(Board.new)
+    @sweeper.should_receive(:expire_cached_pages_by_reference).with(@topic.board)
+    @sweeper.after_save(@topic)
+  end
+end
+  
+describe TopicsController, "page_caching" do
+  include SpecControllerHelper
+
+  it "page_caches the show action" do
+    cached_page_filter_for(:show).should_not be_nil
+  end
+
+  it "tracks read access on @show for show action page caching" do
+    TopicsController.track_options[:show].should == ['@topic', '@posts']
   end
 end

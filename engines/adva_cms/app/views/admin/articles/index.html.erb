@@ -41,7 +41,7 @@
   <%= will_paginate @articles, :id => 'pagination' %>
 
   <script type="text/javascript">
-    var articles_list = new ArticlesList($('articles-body'), {
+    var articles_list = new SortableList($('articles'), {
       onUpdate: function(drag, drop, event) {
         <%= remote_function(:url => admin_articles_path(@site, @section),
                             :method =>   :put,

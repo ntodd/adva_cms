@@ -10,35 +10,33 @@ class EventsController < BaseController
   authenticates_anonymous_user
   acts_as_commentable
 
-  caches_page_with_references :index, :show, :track => ['@event', '@events', '@category', {'@site' => :tag_counts, '@section' => :tag_counts}]
+  # TODO move :comments and @commentable to acts_as_commentable
+  caches_page_with_references :index, :show, :comments, 
+    :track => ['@event', '@events', '@category', '@commentable', {'@site' => :tag_counts, '@section' => :tag_counts}]
   cache_sweeper :calendar_event_sweeper, :tag_sweeper, :category_sweeper, :only => [:create, :update, :destroy]
 
   def index
-    if %w(elapsed recently_added).include?(params[:scope])
-      source = @section.events.published.send(params[:scope])
-    end
-    source ||= @section.events.published.upcoming(current_timespan)
-    if %w(title body).include?(params[:filter])
-      @events = source.search(params[:query], params[:filter]).paginate({:page => params[:page]})
+    scope = @section.events.published
+    scope = %w(elapsed recently_added).include?(params[:scope]) ? scope.send(params[:scope]) : scope.upcoming(current_timespan)
+
+    @events = if %w(title body).include?(params[:filter])
+      scope.search(params[:query], params[:filter])
     elsif params[:filter] == 'tags' and not params[:query].blank?
-      @events = source.paginate_tagged_with(params[:query], :page => params[:page])
+      scope.find_tagged_with(params[:query])
     else
-      if @category 
-        @events = source.by_categories(@category.id).paginate(:page => params[:page])
-      else
-        @events ||= source.paginate(:page => params[:page])
-      end
-    end
+      @category ? scope.by_categories(@category.id) : scope
+    end.paginate(:page => params[:page])
+
     respond_to do |format|
-      format.html { render }
-      format.ics { render :layout => false }
+      format.html
+      format.ics
     end
   end
 
   def show
     respond_to do |format|
-      format.html { render }
-      format.ics { render :layout => false }
+      format.html
+      format.ics
     end
   end
 
@@ -54,21 +52,20 @@ class EventsController < BaseController
     def current_timespan
       return @current_timespan if @current_timespan
       return @current_timespan = [Date.today, nil] if params[:year].blank?
-      y = params[:year].to_i
-      m = params[:month].to_i
-      d = params[:day].to_i
+      y, m, d = params[:year].to_i, params[:month].to_i, params[:day].to_i
+
       if m == 0 and d == 0
         @current_timespan_format = t(:'adva.calendar.titles.formats.year')
-        @current_timespan = Date.new(y)
-        @current_timespan = [@current_timespan, @current_timespan.end_of_year]
+        date = Date.new(y)
+        @current_timespan = [date, date.end_of_year]
       elsif m > 0 and d == 0
         @current_timespan_format = t(:'adva.calendar.titles.formats.year_month')
-        @current_timespan = Date.new(y, m)
-        @current_timespan = [@current_timespan, @current_timespan.end_of_month]
+        date = Date.new(y, m)
+        @current_timespan = [date, date.end_of_month]
       elsif m > 0 and d > 0
         @current_timespan_format = t(:'adva.calendar.titles.formats.year_month_day')
-        @current_timespan = Date.new(y, m, d)
-        @current_timespan = [@current_timespan, @current_timespan.end_of_day]
+        date = Date.new(y, m, d)
+        @current_timespan = [date, date.end_of_day]
       end
     end
 
@@ -82,7 +79,9 @@ class EventsController < BaseController
     def set_event
       @event = @section.events.published.find_by_id params[:id]
       @event ||= @section.events.published.find_by_permalink params[:id]
-      raise "could not find event '#{params[:id]}'" unless @event
+      if !@event || (@event.draft? && !can_preview?)
+        raise ActiveRecord::RecordNotFound
+      end
     end
 
     def set_tags
@@ -93,11 +92,11 @@ class EventsController < BaseController
       end
     end
 
-    def set_author_params
-      params[:event][:author] = current_user ? current_user : nil if params[:event]
-    end
-
     def current_role_context
       @event || @section
+    end
+
+    def can_preview?
+      has_permission?('update', 'article')
     end
 end

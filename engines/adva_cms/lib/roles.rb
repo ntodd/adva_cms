@@ -70,11 +70,18 @@ Rbac.define do
               :'update wikipage'    => :user,
               :'destroy wikipage'   => :moderator,
               :'manage wikipage'    => :moderator,
-
+              
+              :'show topic'         => :moderator,
               :'create topic'       => :user,
               :'update topic'       => :author,
               :'destroy topic'      => :moderator,
               :'moderate topic'     => :moderator,
+
+              :'show board'         => :moderator,
+              :'create board'       => :moderator,
+              :'update board'       => :moderator,
+              :'destroy board'      => :moderator,
+              :'moderate board'     => :moderator,
 
               :'show comment'       => :moderator,
               :'create comment'     => :user,
@@ -82,11 +89,17 @@ Rbac.define do
               :'destroy comment'    => :moderator,
               :'manage comment'     => :admin,
 
-              :'show calendar_event' => :moderator,
-              :'create calendar_event' => :moderator,
-              :'update calendar_event' => :moderator,
+              :'show post'          => :moderator,
+              :'create post'        => :user,
+              :'update post'        => :author,
+              :'destroy post'       => :moderator,
+              :'manage post'        => :admin,
+
+              :'show calendar_event'    => :moderator,
+              :'create calendar_event'  => :moderator,
+              :'update calendar_event'  => :moderator,
               :'destroy calendar_event' => :moderator,
-              :'manage calendar_event' => :moderator,
+              :'manage calendar_event'  => :moderator,
 
               :'show photo'         => :moderator,
               :'create photo'       => :admin,

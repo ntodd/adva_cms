@@ -1,8 +1,10 @@
 class PostsController < BaseController
   authenticates_anonymous_user
 
+  before_filter :set_section
   before_filter :set_topic
   before_filter :set_post, :only => [:edit, :update, :destroy]
+  cache_sweeper :comment_sweeper, :only => [:create, :update, :destroy]
 
   def new
     @post = Post.new
@@ -33,9 +35,14 @@ class PostsController < BaseController
   end
 
   def destroy
-    @post.destroy
-    flash[:notice] = t(:'adva.posts.flash.destroy.success')
-    redirect_to params[:return_to] || topic_path(@section, @topic)
+    if @post == @topic.initial_post
+      flash[:error] = "Initial topic post cannot be deleted"
+      redirect_to params[:return_to] || topic_path(@section, @topic)
+    else
+      @post.destroy
+      flash[:notice] = t(:'adva.posts.flash.destroy.success')
+      redirect_to params[:return_to] || topic_path(@section, @topic)
+    end
   end
 
   protected

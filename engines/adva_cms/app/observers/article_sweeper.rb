@@ -1,4 +1,4 @@
-class ArticleSweeper < PageCacheTagging::Sweeper
+class ArticleSweeper < CacheReferences::Sweeper
   observe Article
   
   # def after_create(article)

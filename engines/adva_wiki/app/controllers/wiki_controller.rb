@@ -10,7 +10,9 @@ class WikiController < BaseController
   authenticates_anonymous_user
   acts_as_commentable
 
-  caches_page_with_references :index, :show, :track => ['@wikipage', '@wikipages', '@category', {'@site' => :tag_counts, '@section' => :tag_counts}]
+  # TODO move :comments and @commentable to acts_as_commentable
+  caches_page_with_references :index, :show, :comments, 
+    :track => ['@wikipage', '@wikipages', '@category', '@commentable', {'@site' => :tag_counts, '@section' => :tag_counts}]
   cache_sweeper :wikipage_sweeper, :category_sweeper, :tag_sweeper, :only => [:create, :update, :rollback, :destroy]
   guards_permissions :wikipage, :except => [:index, :show, :diff, :comments], :edit => :rollback
 
@@ -82,7 +84,7 @@ class WikiController < BaseController
       redirect_to wikipage_path(:section_id => @section, :id => @wikipage.permalink)
     else
       flash.now[:error] = t(:'adva.wiki.flash.rollback.failure', :version => params[:version])
-      redirect_to wikipage_path(:section_id => @section, :id => @wikipage.permalink)
+      render :action => :edit
     end
   end
 

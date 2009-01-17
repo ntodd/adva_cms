@@ -1,33 +1,36 @@
 class AlbumsController < BaseController
   include ActionController::GuardsPermissions::InstanceMethods
   helper :roles
-  
+
   before_filter :set_section
   before_filter :set_set, :set_tags, :set_photos, :only => :index
   before_filter :set_photo,                       :only => :show
   before_filter :guard_view_permissions,          :only => :show
-  
-  caches_page_with_references :index, :show,
-  :track => ['@photo', '@photos', '@set', {'@site' => :tag_counts, '@section' => :tag_counts}]
-  
+
+  # TODO move :comments and @commentable to acts_as_commentable
+  caches_page_with_references :index, :show, :comments,
+    :track => ['@photo', '@photos', '@set', '@commentable', {'@site' => :tag_counts, '@section' => :tag_counts}]
+
   authenticates_anonymous_user
   acts_as_commentable
-  
+
   def index
     respond_to do |format|
       format.html { render }
       # format.atom { render :layout => false }
     end
   end
-  
+
   def show
     respond_to do |format|
       format.html { render }
       # format.atom { render :layout => false }
     end
   end
-  
+
   protected
+    def set_section; super(Album); end
+
     def set_photos
       # TODO that condition part would clearly go to model...
       options = { :page => current_page, :tags => @tags, :conditions => ["published_at IS NOT NULL"], :order => 'published_at DESC' }
@@ -68,7 +71,7 @@ class AlbumsController < BaseController
       write_flash_to_cookie # TODO make around filter or something
       @tags = nil
     end
-    
+
     def can_preview?
       has_permission?('update', 'photo')
     end
@@ -76,7 +79,7 @@ class AlbumsController < BaseController
     def guard_view_permissions
       unless @photo.published?
         guard_permission(:update, :photo)
-        @skip_caching = true
+        skip_caching!
       end
     end
 end

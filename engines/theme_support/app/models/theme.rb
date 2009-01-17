@@ -158,7 +158,15 @@ class Theme
   end
 
   def preview
-    others.find('preview-png') || Theme::Other.default_preview(self, @@default_preview_path)
+    unless ::File.exists?(preview_path)
+      FileUtils.mkdir_p ::File.dirname(preview_path)
+      FileUtils.cp @@default_preview_path, preview_path 
+    end
+    assets.find('images-preview-png')
+  end
+  
+  def preview_path
+    "#{self.path}/images/preview.png"
   end
 
   def update_attributes(attributes)

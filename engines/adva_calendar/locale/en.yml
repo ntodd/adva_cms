@@ -5,13 +5,17 @@ en:
       no_location: No location
       confirm_delete: Are you sure you wish to delete this article?
       publish_on_date: Publish on this date
-      starting_at: Starting at {{startdate}}
+      starting_at: Starting at {{start_date}}
       question_save_as_draft: Save as Draft?
       confirm_save_as_draft: Yes, save this article as a draft
-      from_to: '{{startdate}} - {{enddate}}'
+      from_to: '{{start_date}} - {{end_date}}'
+      total_events_with_count:
+        one: "Total: {{count}} event."
+        other: "Total: {{count}} events."
       errors:
         no_events: No events in {{title}} for this period of time
         no_events_in_calendar: There are no events yet in this calendar.
+        no_events_found: No events matching your filter.
       input_defaults:
         search: Search
       titles:
@@ -28,9 +32,19 @@ en:
         publish_in_categories: Publish in Categories
         actions: Actions
         formats:
-          year_month_day: 'at %B %m %Y'
+          year_month_day: 'on %e %B %Y'
           year_month: 'in %B %Y'
           year: 'in %Y'
+      flash:
+        create:
+          success: The event has been created.
+          failure: The event could not be created.
+        update:
+          success: The event has been updated.
+          failure: The event could not be updated.
+        destroy:
+          success: The event has been deleted.
+          failure: The event could not be deleted.
       buttons:
         go: Go
         search: Search
@@ -57,8 +71,8 @@ en:
         create_new_location: Create a new location
       attributes:
         title: Title
-        startdate: Starting at
-        enddate: Ending at
+        start_date: Starting at
+        end_date: Ending at
         body: Write your description
         tags: Tags
         host: Organizer

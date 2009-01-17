@@ -1,10 +1,5 @@
 <h2>
   <%= @section.title %>
-  <span class="meta">
-    <!-- <%#= t :'adva.boards.topics_count', :counts => @section.topics_count %>, -->
-    <!-- <%#= t :'adva.boards.comments_count', :counts => @section.comments_count %> &middot; -->
-    <!-- <%#= link_to 'New topic', new_topic_path(@section) %> -->
-  </span>
 </h2>
 
 <table id="boards" class="list">
@@ -15,7 +10,7 @@
     </tr>  
   </thead>
   <tbody>
-  <% @section.boards.each do |board| %>
+  <% @boards.each do |board| %>
     <tr id="<%= dom_id board %>">
       <td>
         <h3><%= link_to board.title, forum_board_path(@section, board) %></h3>

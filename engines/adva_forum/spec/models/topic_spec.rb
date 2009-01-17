@@ -12,6 +12,11 @@ describe Topic do
     @topic.site = @site
     @topic.section = @section
   end
+  
+  it "delegates comment_filter to a site" do
+    @site.stub!(:comment_filter).and_return 'filter'
+    @topic.comment_filter.should == @site.comment_filter
+  end
 
   describe "class extensions:" do
     it "has a permalink generated from the title" do
@@ -23,7 +28,7 @@ describe Topic do
     end
 
     it 'acts as a role context' do
-      Topic.should act_as_role_context(:roles => :author)
+      Topic.should act_as_role_context(:parent => Board)
     end
 
     # it 'specifies implicit roles (author roles for comments)' do
@@ -44,14 +49,21 @@ describe Topic do
       @topic.should belong_to(:section)
     end
 
+    it 'belongs to a board' do
+      @topic.should belong_to(:board)
+    end
+
     it 'belongs to a last comment' do
       @topic.should belong_to(:last_comment)
+    end
+
+    it 'belongs to a author' do
+      @topic.should belong_to(:author)
     end
 
     it 'belongs to a last_author' do
       @topic.should belong_to(:last_author)
     end
-
   end
 
   describe "callbacks:" do
@@ -70,7 +82,7 @@ describe Topic do
       @topic.stub!(:set_site) # otherwise conflicts with the implementation of validate_presence_of
       @topic.should validate_presence_of(:title)
     end
-
+    
     it 'validates the presence of a body on create' do
       @topic.stub!(:set_site) # otherwise conflicts with the implementation of validate_presence_of
       @topic.should validate_presence_of(:body) # TODO :on => :create
@@ -124,6 +136,12 @@ describe Topic do
         @topic.reply @user, @attributes
       end
 
+      it 'sets the board' do
+        @topic.comments.stub!(:build).and_return @comment
+        @comment.should_receive(:board=).with @topic.board
+        @topic.reply @user, @attributes
+      end
+
       it 'sets itself as the commentable' do
         @topic.comments.stub!(:build).and_return @comment
         @comment.should_receive(:commentable=).with @topic
@@ -138,8 +156,24 @@ describe Topic do
       end
     end
 
-    describe '#revise' do
-      it 'should be specified and implemented' # not sure if this actually makes sense in the end
+    describe "#revise" do
+      before :each do
+        @comment = stub_comment
+        @board = Board.new
+        @topic.save
+        @topic.stub!(:comments).and_return [@comment]
+        @topic.stub!(:board).and_return @board
+      end
+      
+      it "does not touch the comments if topics board is not changed" do
+        @topic.should_not_receive(:comments)
+        @topic.revise @user, nil
+      end
+      
+      it "updates topics comments when board of topics is changed" do
+        @comment.should_receive(:update_attribute).with(:board_id, 1)
+        @topic.revise @user, {:board_id => 1}
+      end
     end
 
     describe '#accept_comments?' do
@@ -261,6 +295,10 @@ describe Topic do
       @topic.section.should_receive(:site_id).and_return 1
       @topic.should_receive(:site_id=).with 1
       @topic.send :set_site
+    end
+    
+    it '#initial_post returns the first post of the topic' do
+      @topic.initial_post.should == @topic.comments.first
     end
   end
 end

@@ -48,8 +48,9 @@ class InstallationTest < ActionController::IntegrationTest
     
     # check that confirmation page has correct user attributes
     assert_select 'p#user_profile', /test@example.org/
-    assert_select 'p#user_profile', /test_password/
-    
+  end
+  
+  def manage_new_site!
     # go to admin main page
     get admin_site_path(Site.first)
 
