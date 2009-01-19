@@ -258,7 +258,7 @@ describe User do
     end
     
     it "#homepage returns nil if homepage is not set" do
-      @user.homepage.should == nil
+      @user.homepage.should be_nil
     end
 
     describe "#update_roles updates associated roles to match the given role parameters" do

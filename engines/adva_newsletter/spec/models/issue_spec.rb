@@ -35,11 +35,11 @@ describe Issue do
   describe "methods:" do
     describe "destroy" do
       it "should move Issue to DeletedIssue" do
-        Issue.find_by_id(@issue.id).should_not == nil
-        DeletedIssue.find_by_id(@issue.id).should == nil
+        Issue.find_by_id(@issue.id).should_not be_nil
+        DeletedIssue.find_by_id(@issue.id).should be_nil
         @issue.destroy
-        Issue.find_by_id(@issue.id).should == nil
-        DeletedIssue.find_by_id(@issue.id).should_not == nil
+        Issue.find_by_id(@issue.id).should be_nil
+        DeletedIssue.find_by_id(@issue.id).should_not be_nil
       end
       
       it "should decrease issues_count by -1" do
@@ -72,12 +72,12 @@ describe Issue do
     
     describe "draft?" do
       it "should be true with new issue" do
-        @issue.draft?.should == true
+        @issue.draft?.should be_true
       end
 
       it "should be true when issue is draft" do
         @issue.draft = 1
-        @issue.draft?.should == true
+        @issue.draft?.should be_true
       end
     end
     
@@ -115,9 +115,9 @@ describe Issue do
       # @mailer = mock(NewsletterMailer)
       # @mailer.should_receive(:deliver_issue).and_return(true)
 
-      # @issue.published_at.should == nil
+      # @issue.published_at.should be_nil
       # @issue.deliver(:to => @user)
-      # @issue.published_at.should_not == nil
+      # @issue.published_at.should_not be_nil
     end
     
     it "should deliver issue ONLY TO test user LATER" do
