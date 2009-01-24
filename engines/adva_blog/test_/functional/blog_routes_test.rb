@@ -28,7 +28,7 @@ class BlogRoutesTest < ActionController::TestCase
           unless path_suffix =~ /pages/
             r.it_maps :get, '/2000/1/1/an-article',      :action => 'show', :year => '2000', :month => '1', :day => '1',
                                                          :permalink => 'an-article'
-
+  
             # article feeds
             r.it_maps :get, '.atom',                     :action => 'index', :format => 'atom'
             r.it_maps :get, '/categories/foo.atom',      :action => 'index', :category_id => 'foo', :format => 'atom'
