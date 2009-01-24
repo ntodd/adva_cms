@@ -17,6 +17,7 @@ class Comment < ActiveRecord::Base
   belongs_to :board
   belongs_to :commentable, :polymorphic => true
   belongs_to_author
+  has_many :activities, :as => :object # move to adva_activity?
 
   validates_presence_of :body, :commentable
 
