@@ -65,7 +65,7 @@ class Topic < ActiveRecord::Base
   end
 
   def paged?
-    comments_count > @section.comments_per_page
+    comments_count > section.comments_per_page
   end
 
   def last_page
